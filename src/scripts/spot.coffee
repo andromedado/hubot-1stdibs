@@ -31,7 +31,7 @@
 #   mcminton, andromedado
 https = require 'https'
 
-VERSION = '1.3.4'
+VERSION = '1.3.5'
 
 URL = "#{process.env.HUBOT_SPOT_URL}"
 
@@ -291,12 +291,15 @@ module.exports = (robot) ->
   robot.respond /query (.*)/i, (message) ->
     params = {q: message.match[1]}
     spotRequest message, '/single-query', 'get', params, (err, res, body) ->
-      track = JSON.parse(body)
-      robot.brain.set('lastSingleQuery', track)
-      message.send(":small_blue_diamond: I found:")
-      setTimeout(() ->
-        message.send(explain track)
-      , CAMPFIRE_CHRONOLOGICAL_DELAY)
+      try
+        track = JSON.parse(body)
+        robot.brain.set('lastSingleQuery', track)
+        message.send(":small_blue_diamond: I found:")
+        setTimeout(() ->
+          message.send(explain track)
+        , CAMPFIRE_CHRONOLOGICAL_DELAY)
+      catch err
+        message.send(":small_blue_diamond: :flushed: " + err.message)
 
   robot.respond /,?\s*find ?(.*) (music|((songs|tracks)( of)?)) (.*)/i, (message) ->
     limit = determineLimit message.match[1]
